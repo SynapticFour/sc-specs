@@ -1,0 +1,76 @@
+asyncapi: 2.6.0
+id: https://specs.synapticfour.com/sc-transport/v1
+defaultContentType: application/json
+info:
+  title: Synaptic Core — Transport API
+  version: 1.0.0
+  description: Event-driven telemetry transport for active workflow runs. SSE is stable, QUIC streams are optional, and QUIC datagrams are experimental.
+  contact:
+    name: Synaptic Four
+    url: https://synapticfour.com
+    email: standards@synapticfour.com
+  license:
+    name: CC0 1.0 Universal
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+tags:
+  - name: transport
+    description: Telemetry transport specification.
+servers:
+  default:
+    url: /sc/transport/v1
+    protocol: https
+    description: Default mount point (configurable per deployment)
+channels:
+  sc/runs/{runId}/telemetry:
+    description: Telemetry events for an active workflow run
+    parameters:
+      runId:
+        description: Workflow run ULID
+        schema:
+          type: string
+    x-sc-transport-sse: stable
+    x-sc-transport-quic-stream: optional
+    x-sc-transport-quic-datagram: experimental
+    publish:
+      operationId: publishRunTelemetry
+      message:
+        $ref: '#/components/messages/TelemetryEvent'
+components:
+  messages:
+    TelemetryEvent:
+      messageId: telemetryEvent
+      name: TelemetryEvent
+      title: Telemetry event
+      payload:
+        $ref: '#/components/schemas/TelemetryEvent'
+  schemas:
+    TelemetryEvent:
+      type: object
+      properties:
+        run_id:
+          type: string
+        task_id:
+          type: [string, 'null']
+        event_type:
+          type: string
+          enum: [run_started, run_completed, run_failed, task_queued, task_started, task_completed, task_failed, progress, transport_fallback]
+        timestamp_ms:
+          type: integer
+        payload:
+          type: object
+          additionalProperties: true
+      required: [run_id, task_id, event_type, timestamp_ms, payload]
+x-transport-modes:
+  - mode: sse
+    stability: stable
+    endpoint: GET /sc/transport/v1/runs/{id}/events
+    content_type: text/event-stream
+    notes: Available always.
+  - mode: quic_stream
+    stability: optional
+    endpoint: HTTP/3 stream equivalent of SSE
+    notes: Available when server has quic-control feature.
+  - mode: quic_datagram
+    stability: experimental
+    endpoint: QUIC datagram channel
+    notes: Available when server has quic-datagrams feature. Delivery not guaranteed; see LIMITATIONS.md.

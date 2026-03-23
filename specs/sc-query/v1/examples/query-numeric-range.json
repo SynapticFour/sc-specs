@@ -1,0 +1,1 @@
+{"target":"objects","filters":[{"field":"size_bytes","operator":"gte","value":1000},{"field":"size_bytes","operator":"lt","value":2000}]}

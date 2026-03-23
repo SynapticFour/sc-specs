@@ -1,0 +1,1 @@
+{"target":"tasks","filters":[{"field":"status","operator":"eq","value":"COMPLETE"},{"field":"exit_code","operator":"eq","value":0}]}

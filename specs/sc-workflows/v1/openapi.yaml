@@ -1,0 +1,176 @@
+openapi: 3.1.0
+info:
+  title: Synaptic Core — Workflows API
+  version: 1.0.0
+  description: Domain-agnostic workflow orchestration for CWL, WDL, Nextflow, and Snakemake. Proposed standard under CC0 1.0 Universal.
+
+  contact:
+    name: Synaptic Four
+    url: https://synapticfour.com
+    email: standards@synapticfour.com
+  license:
+    name: CC0 1.0 Universal
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+servers:
+  - url: /sc/workflows/v1
+    description: Default mount point (configurable per deployment)
+tags:
+  - name: runs
+    description: Workflow run lifecycle operations.
+paths:
+  /runs:
+    post:
+      tags: [runs]
+      summary: Submit workflow run
+      description: Submit a workflow descriptor URL and engine-specific parameters for orchestration.
+      operationId: submitWorkflowRun
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubmitWorkflowRunRequest'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/WorkflowRunStatus'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    get:
+      tags: [runs]
+      summary: List workflow runs
+      description: Return paginated workflow run statuses with optional filters.
+      operationId: listWorkflowRuns
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: query
+          name: status
+          schema: {$ref: '#/components/schemas/WorkflowStatus'}
+        - in: query
+          name: engine
+          schema: {$ref: '#/components/schemas/WorkflowEngine'}
+        - in: query
+          name: limit
+          schema: {type: integer, default: 20, minimum: 1, maximum: 100}
+        - in: query
+          name: offset
+          schema: {type: integer, default: 0, minimum: 0}
+      responses:
+        '200':
+          description: Workflow run list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  runs: {type: array, items: {$ref: '#/components/schemas/WorkflowRunStatus'}}
+                  total: {type: integer}
+                required: [runs, total]
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /runs/{id}:
+    get:
+      tags: [runs]
+      summary: Get workflow run status
+      description: Retrieve the latest state for a workflow run.
+      operationId: getWorkflowRun
+      x-synaptic-core-stability: stable
+      parameters: [{$ref: '#/components/parameters/RunId'}]
+      responses:
+        '200': {description: Run status, content: {application/json: {schema: {$ref: '#/components/schemas/WorkflowRunStatus'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    delete:
+      tags: [runs]
+      summary: Cancel all running tasks in this workflow run
+      description: Issue cancellation request to all active tasks in the run.
+      operationId: cancelWorkflowRun
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      parameters: [{$ref: '#/components/parameters/RunId'}]
+      responses:
+        '200': {description: Updated run state, content: {application/json: {schema: {$ref: '#/components/schemas/WorkflowRunStatus'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /runs/{id}/tasks:
+    get:
+      tags: [runs]
+      summary: List all tasks spawned by this workflow run
+      description: Return task statuses associated with a workflow run.
+      operationId: listWorkflowRunTasks
+      x-synaptic-core-stability: stable
+      parameters: [{$ref: '#/components/parameters/RunId'}]
+      responses:
+        '200':
+          description: Tasks in run
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks: {type: array, items: {type: object, additionalProperties: true}}
+                required: [tasks]
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  parameters:
+    RunId:
+      in: path
+      name: id
+      required: true
+      schema: {type: string, pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'}
+  responses:
+    BadRequest: {description: Bad request, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Unauthorized: {description: Unauthorized, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Forbidden: {description: Forbidden, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    NotFound: {description: Not found, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    InternalError: {description: Internal error, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+      required: [title, status]
+    WorkflowEngine:
+      type: string
+      enum: [cwl, wdl, nextflow, snakemake]
+    WorkflowStatus:
+      type: string
+      enum: [QUEUED, RUNNING, COMPLETE, FAILED, CANCELED]
+    SubmitWorkflowRunRequest:
+      type: object
+      properties:
+        engine: {$ref: '#/components/schemas/WorkflowEngine'}
+        workflow_url: {type: string, format: uri}
+        parameters: {type: object, additionalProperties: true}
+        tags: {type: array, items: {type: string}}
+        continue_on_error: {type: boolean, default: false}
+      required: [engine, workflow_url]
+    WorkflowRunStatus:
+      type: object
+      properties:
+        id: {type: string}
+        engine: {type: string}
+        workflow_url: {type: string}
+        status: {$ref: '#/components/schemas/WorkflowStatus'}
+        created_at: {type: string, format: date-time}
+        started_at: {type: [string, 'null'], format: date-time}
+        finished_at: {type: [string, 'null'], format: date-time}
+        wall_time_seconds: {type: [integer, 'null']}
+        task_count: {type: integer}
+        tasks_complete: {type: integer}
+        tasks_failed: {type: integer}
+        ro_crate_url: {type: [string, 'null']}
+        provenance_node_id: {type: string}
+      required: [id, engine, workflow_url, status, created_at, started_at, finished_at, wall_time_seconds, task_count, tasks_complete, tasks_failed, ro_crate_url, provenance_node_id]

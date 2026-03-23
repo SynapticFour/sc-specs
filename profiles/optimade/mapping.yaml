@@ -1,0 +1,6 @@
+optimade:
+  sc_primitive: sc-query
+  mapping:
+    - optimade: "GET /v1/structures?filter=..."
+      sc: "POST /sc/query/v1/query"
+      notes: "OPTIMADE filters can be translated into SC filter arrays."

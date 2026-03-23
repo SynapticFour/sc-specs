@@ -1,0 +1,1 @@
+{"name":"external.fits","mime_type":"image/fits","size_bytes":2048,"checksums":[{"type":"md5","checksum":"5d41402abc4b2a76b9719d911017c592"}],"access_methods":[{"type":"https","url":"https://archive.example.org/external.fits"}],"metadata":{"mission":"demo"}}

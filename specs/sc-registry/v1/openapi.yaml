@@ -1,0 +1,233 @@
+openapi: 3.1.0
+info:
+  title: Synaptic Core — Registry API
+  version: 1.0.0
+  description: Domain-agnostic registry for versioned tools and workflows. Proposed standard under CC0 1.0 Universal.
+
+  contact:
+    name: Synaptic Four
+    url: https://synapticfour.com
+    email: standards@synapticfour.com
+  license:
+    name: CC0 1.0 Universal
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+servers:
+  - url: /sc/registry/v1
+    description: Default mount point (configurable per deployment)
+tags:
+  - name: tools
+    description: Tool registration and discovery.
+  - name: workflows
+    description: Workflow definition registration and discovery.
+paths:
+  /tools:
+    post:
+      tags: [tools]
+      summary: Register tool
+      description: Create a versioned tool entry with image and metadata.
+      operationId: registerTool
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateToolRequest'}
+      responses:
+        '201': {description: Tool created, content: {application/json: {schema: {$ref: '#/components/schemas/ToolEntry'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    get:
+      tags: [tools]
+      summary: List tools
+      description: List tool entries filtered by name/version.
+      operationId: listTools
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: query
+          name: name
+          schema: {type: string}
+        - in: query
+          name: version
+          schema: {type: string}
+        - in: query
+          name: limit
+          schema: {type: integer, default: 20, minimum: 1, maximum: 100}
+        - in: query
+          name: offset
+          schema: {type: integer, default: 0, minimum: 0}
+      responses:
+        '200':
+          description: Tool list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tools: {type: array, items: {$ref: '#/components/schemas/ToolEntry'}}
+                required: [tools]
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /tools/{id}/versions/{version}:
+    get:
+      tags: [tools]
+      summary: Get tool version
+      description: Return one versioned tool entry.
+      operationId: getToolVersion
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+        - in: path
+          name: version
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: Tool entry, content: {application/json: {schema: {$ref: '#/components/schemas/ToolEntry'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /workflows:
+    post:
+      tags: [workflows]
+      summary: Register workflow
+      description: Create a versioned workflow entry and parameter schema.
+      operationId: registerWorkflow
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateWorkflowRequest'}
+      responses:
+        '201': {description: Workflow created, content: {application/json: {schema: {$ref: '#/components/schemas/WorkflowEntry'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    get:
+      tags: [workflows]
+      summary: List workflows
+      description: List workflow entries filtered by name/version/engine.
+      operationId: listWorkflows
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: query
+          name: name
+          schema: {type: string}
+        - in: query
+          name: version
+          schema: {type: string}
+        - in: query
+          name: engine
+          schema: {type: string}
+        - in: query
+          name: limit
+          schema: {type: integer, default: 20, minimum: 1, maximum: 100}
+        - in: query
+          name: offset
+          schema: {type: integer, default: 0, minimum: 0}
+      responses:
+        '200':
+          description: Workflow list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflows: {type: array, items: {$ref: '#/components/schemas/WorkflowEntry'}}
+                required: [workflows]
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /workflows/{id}/versions/{version}/descriptor:
+    get:
+      tags: [workflows]
+      summary: Retrieve workflow definition (text content)
+      description: Return workflow descriptor content or redirect to registered definition URL.
+      operationId: getWorkflowDescriptor
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+        - in: path
+          name: version
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: Descriptor content
+          content:
+            text/plain: {schema: {type: string}}
+            application/x-cwl: {schema: {type: string}}
+            application/x-wdl: {schema: {type: string}}
+        '302': {description: Redirect to definition_url}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  responses:
+    BadRequest: {description: Bad request, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Unauthorized: {description: Unauthorized, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Forbidden: {description: Forbidden, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    NotFound: {description: Not found, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    InternalError: {description: Internal error, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+      required: [title, status]
+    ToolEntry:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        version: {type: string}
+        container_image: {type: string}
+        description: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+      required: [id, name, version, container_image, description, metadata]
+    WorkflowEntry:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: string}
+        version: {type: string}
+        engine: {type: string}
+        definition_url: {type: string, format: uri}
+        parameters_schema: {type: object, additionalProperties: true}
+        description: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+      required: [id, name, version, engine, definition_url, parameters_schema, description, metadata]
+    CreateToolRequest:
+      type: object
+      properties:
+        name: {type: string}
+        version: {type: string}
+        container_image: {type: string}
+        description: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+      required: [name, version, container_image]
+    CreateWorkflowRequest:
+      type: object
+      properties:
+        name: {type: string}
+        version: {type: string}
+        engine: {type: string}
+        definition_url: {type: string, format: uri}
+        parameters_schema: {type: object, additionalProperties: true}
+        description: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+      required: [name, version, engine, definition_url, parameters_schema]

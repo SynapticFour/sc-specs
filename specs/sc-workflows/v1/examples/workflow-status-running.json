@@ -1,0 +1,1 @@
+{"id":"01KMAZ9WKAVNVE94E054SM77VF","engine":"cwl","workflow_url":"https://example.org/wf.cwl","status":"RUNNING","created_at":"2026-03-23T00:00:00Z","started_at":"2026-03-23T00:00:10Z","finished_at":null,"wall_time_seconds":null,"task_count":2,"tasks_complete":1,"tasks_failed":0,"ro_crate_url":null,"provenance_node_id":"01KMAZ9WKAVNVE94E054SM77VG"}

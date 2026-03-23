@@ -1,0 +1,211 @@
+openapi: 3.1.0
+info:
+  title: Synaptic Core — Tasks API
+  version: 1.0.0
+  description: Domain-agnostic API for engine-agnostic, containerized task execution. Proposed standard under CC0 1.0 Universal.
+
+  contact:
+    name: Synaptic Four
+    url: https://synapticfour.com
+    email: standards@synapticfour.com
+  license:
+    name: CC0 1.0 Universal
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+servers:
+  - url: /sc/tasks/v1
+    description: Default mount point (configurable per deployment)
+tags:
+  - name: tasks
+    description: Task submission, status, listing, and cancellation.
+  - name: logs
+    description: Task log retrieval and streaming.
+paths:
+  /tasks:
+    post:
+      tags: [tasks]
+      summary: Submit a task for execution
+      description: Submit a containerized task with optional object inputs and captured outputs.
+      operationId: submitTask
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SubmitTaskRequest'}
+      responses:
+        '201': {description: Task accepted, content: {application/json: {schema: {$ref: '#/components/schemas/TaskStatus'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+    get:
+      tags: [tasks]
+      summary: List tasks
+      description: Return paginated task status records, optionally filtered by lifecycle status.
+      operationId: listTasks
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: query
+          name: status
+          schema: {$ref: '#/components/schemas/TaskLifecycleStatus'}
+        - in: query
+          name: limit
+          schema: {type: integer, default: 20, minimum: 1, maximum: 100}
+        - in: query
+          name: offset
+          schema: {type: integer, default: 0, minimum: 0}
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks: {type: array, items: {$ref: '#/components/schemas/TaskStatus'}}
+                  total: {type: integer}
+                required: [tasks, total]
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /tasks/{id}:
+    get:
+      tags: [tasks]
+      summary: Get task status
+      description: Retrieve the current status of a submitted task by ULID.
+      operationId: getTask
+      x-synaptic-core-stability: stable
+      parameters: [{$ref: '#/components/parameters/TaskId'}]
+      responses:
+        '200': {description: Task status, content: {application/json: {schema: {$ref: '#/components/schemas/TaskStatus'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    delete:
+      tags: [tasks]
+      summary: Cancel a running task
+      description: Request cancellation for a running task.
+      operationId: cancelTask
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      parameters: [{$ref: '#/components/parameters/TaskId'}]
+      responses:
+        '200': {description: Updated task state, content: {application/json: {schema: {$ref: '#/components/schemas/TaskStatus'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /tasks/{id}/logs:
+    get:
+      tags: [logs]
+      summary: Retrieve task logs
+      description: Return stdout/stderr logs, optionally as a streaming feed.
+      operationId: getTaskLogs
+      x-synaptic-core-stability: stable
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - in: query
+          name: stream
+          schema: {type: boolean, default: false}
+      responses:
+        '200':
+          description: Task logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stdout: {type: string}
+                  stderr: {type: string}
+                  exit_code: {type: [integer, 'null']}
+                required: [stdout, stderr, exit_code]
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  parameters:
+    TaskId:
+      in: path
+      name: id
+      required: true
+      schema: {type: string, pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'}
+  responses:
+    BadRequest: {description: Bad request, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Unauthorized: {description: Unauthorized, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Forbidden: {description: Forbidden, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    NotFound: {description: Not found, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Conflict: {description: Conflict, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    ServiceUnavailable: {description: No backend available, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    InternalError: {description: Internal error, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+        instance: {type: string}
+      required: [title, status]
+    TaskLifecycleStatus:
+      type: string
+      enum: [QUEUED, INITIALIZING, RUNNING, COMPLETE, ERROR, CANCELED, CANCELING, UNKNOWN]
+    InputRef:
+      type: object
+      properties:
+        object_id: {type: string}
+        path: {type: string}
+      required: [object_id, path]
+    OutputCaptureRequest:
+      type: object
+      properties:
+        path: {type: string}
+        name: {type: string}
+      required: [path, name]
+    OutputRef:
+      type: object
+      properties:
+        object_id: {type: string}
+        path: {type: string}
+        name: {type: string}
+      required: [object_id, path, name]
+    TaskResources:
+      type: object
+      properties:
+        cpu_cores: {type: integer, default: 1}
+        ram_gb: {type: number, default: 1.0}
+        disk_gb: {type: number, default: 10.0}
+        gpu_count: {type: integer, default: 0}
+        max_wall_time_seconds: {type: integer, default: 3600}
+    SubmitTaskRequest:
+      type: object
+      properties:
+        name: {type: [string, 'null']}
+        container_image: {type: string}
+        command: {type: array, items: {type: string}, minItems: 1}
+        resources: {$ref: '#/components/schemas/TaskResources'}
+        inputs: {type: array, items: {$ref: '#/components/schemas/InputRef'}}
+        outputs: {type: array, items: {$ref: '#/components/schemas/OutputCaptureRequest'}}
+        environment: {type: object, additionalProperties: {type: string}}
+        backend: {type: [string, 'null'], enum: [docker, slurm, lsf, pbs, null]}
+      required: [container_image, command]
+    TaskStatus:
+      type: object
+      properties:
+        id: {type: string}
+        name: {type: [string, 'null']}
+        status: {$ref: '#/components/schemas/TaskLifecycleStatus'}
+        exit_code: {type: [integer, 'null']}
+        created_at: {type: string, format: date-time}
+        started_at: {type: [string, 'null'], format: date-time}
+        finished_at: {type: [string, 'null'], format: date-time}
+        backend: {type: string}
+        backend_job_id: {type: [string, 'null']}
+        inputs: {type: array, items: {$ref: '#/components/schemas/InputRef'}}
+        outputs: {type: array, items: {$ref: '#/components/schemas/OutputRef'}}
+        provenance_node_id: {type: string}
+      required: [id, name, status, exit_code, created_at, started_at, finished_at, backend, backend_job_id, inputs, outputs, provenance_node_id]

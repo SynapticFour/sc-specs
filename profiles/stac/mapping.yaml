@@ -1,0 +1,6 @@
+stac:
+  sc_primitives: [sc-objects, sc-query]
+  mapping:
+    - stac: "POST /search"
+      sc: "POST /sc/query/v1/query"
+      notes: "STAC property filters map to SC filter operators."

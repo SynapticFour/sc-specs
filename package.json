@@ -1,0 +1,8 @@
+{
+  "name": "sc-specs",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "validate": "spectral lint 'specs/**/openapi.yaml' && asyncapi validate specs/sc-transport/v1/asyncapi.yaml && python3 scripts/validate_examples.py"
+  }
+}

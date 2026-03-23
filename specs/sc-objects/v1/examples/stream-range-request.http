@@ -1,0 +1,3 @@
+GET /sc/objects/v1/objects/01KMAZ9WKAVNVE94E054SM77VZ/stream HTTP/1.1
+Host: example.org
+Range: bytes=0-1023

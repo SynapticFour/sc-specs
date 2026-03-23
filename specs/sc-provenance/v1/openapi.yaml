@@ -1,0 +1,176 @@
+openapi: 3.1.0
+info:
+  title: Synaptic Core — Provenance API
+  version: 1.0.0
+  description: Append-only provenance graph traversal and linkage with RO-Crate export. Domain-agnostic proposed standard under CC0 1.0 Universal.
+
+  contact:
+    name: Synaptic Four
+    url: https://synapticfour.com
+    email: standards@synapticfour.com
+  license:
+    name: CC0 1.0 Universal
+    url: https://creativecommons.org/publicdomain/zero/1.0/
+servers:
+  - url: /sc/provenance/v1
+    description: Default mount point (configurable per deployment)
+tags:
+  - name: graph
+    description: Provenance graph traversal operations.
+  - name: links
+    description: Manual link assertion operations.
+  - name: ro-crate
+    description: Workflow run RO-Crate export operations.
+paths:
+  /graph/{id}:
+    get:
+      tags: [graph]
+      summary: Full provenance subgraph for a node (bounded depth)
+      description: Return a bounded-depth subgraph rooted at the provided node.
+      operationId: getProvenanceGraph
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+        - in: query
+          name: depth
+          schema: {type: integer, default: 5, minimum: 1, maximum: 20}
+      responses:
+        '200': {description: Provenance graph, content: {application/json: {schema: {$ref: '#/components/schemas/ProvenanceGraph'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /upstream/{id}:
+    get:
+      tags: [graph]
+      summary: All ancestors of a node
+      description: Return all upstream lineage nodes and links.
+      operationId: getUpstreamGraph
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: Provenance graph, content: {application/json: {schema: {$ref: '#/components/schemas/ProvenanceGraph'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /downstream/{id}:
+    get:
+      tags: [graph]
+      summary: All descendants of a node
+      description: Return all downstream lineage nodes and links.
+      operationId: getDownstreamGraph
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200': {description: Provenance graph, content: {application/json: {schema: {$ref: '#/components/schemas/ProvenanceGraph'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /links:
+    post:
+      tags: [links]
+      summary: Manually assert a derived_from link
+      description: Add a manual provenance relationship between existing nodes.
+      operationId: createProvenanceLink
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source_id: {type: string}
+                target_id: {type: string}
+                link_type: {type: string, enum: [derived_from, part_of]}
+                description: {type: string}
+              required: [source_id, target_id, link_type]
+      responses:
+        '201': {description: Link created, content: {application/json: {schema: {$ref: '#/components/schemas/Link'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /runs/{id}/ro-crate.zip:
+    get:
+      tags: [ro-crate]
+      summary: Download a Workflow Run RO-Crate for a completed run
+      description: Download RO-Crate archive for a completed workflow run.
+      operationId: downloadWorkflowRunRoCrate
+      x-synaptic-core-stability: stable
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string}
+      responses:
+        '200':
+          description: RO-Crate ZIP archive
+          content:
+            application/zip:
+              schema: {type: string, format: binary}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+        '500': {$ref: '#/components/responses/InternalError'}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  responses:
+    BadRequest: {description: Bad request, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Unauthorized: {description: Unauthorized, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Forbidden: {description: Forbidden, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    NotFound: {description: Not found, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    Conflict: {description: Conflict, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+    InternalError: {description: Internal error, content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}}
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        type: {type: string}
+        title: {type: string}
+        status: {type: integer}
+        detail: {type: string}
+      required: [title, status]
+    NodeType:
+      type: string
+      enum: [data, calculation, workflow, external]
+    LinkType:
+      type: string
+      enum: [input_of, output_of, derived_from, called_by, part_of]
+    Node:
+      type: object
+      properties:
+        id: {type: string}
+        type: {$ref: '#/components/schemas/NodeType'}
+        label: {type: string}
+        created_at: {type: string, format: date-time}
+        metadata: {type: object, additionalProperties: true}
+      required: [id, type, label, created_at, metadata]
+    Link:
+      type: object
+      properties:
+        source_id: {type: string}
+        target_id: {type: string}
+        link_type: {$ref: '#/components/schemas/LinkType'}
+        created_at: {type: string, format: date-time}
+      required: [source_id, target_id, link_type, created_at]
+    ProvenanceGraph:
+      type: object
+      properties:
+        root_id: {type: string}
+        nodes: {type: array, items: {$ref: '#/components/schemas/Node'}}
+        links: {type: array, items: {$ref: '#/components/schemas/Link'}}
+      required: [root_id, nodes, links]

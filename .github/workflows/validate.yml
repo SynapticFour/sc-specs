@@ -1,0 +1,37 @@
+name: Validate Specs
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install validators
+        run: npm install --no-save @stoplight/spectral-cli @asyncapi/cli
+
+      - name: Install Python validators
+        run: pip install pyyaml jsonschema
+
+      - name: Lint OpenAPI 3.1 specs
+        run: npx spectral lint "specs/**/openapi.yaml"
+
+      - name: Validate AsyncAPI 2.6 spec
+        run: npx asyncapi validate specs/sc-transport/v1/asyncapi.yaml
+
+      - name: Validate examples against schemas
+        run: python3 scripts/validate_examples.py

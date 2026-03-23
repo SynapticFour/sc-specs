@@ -1,0 +1,6 @@
+ivoa_vospace:
+  sc_primitive: sc-objects
+  mapping:
+    - ivoa: "GET /vospace/nodes/{id}"
+      sc: "GET /sc/objects/v1/objects/{id}"
+      notes: "VOSpace node metadata maps to ObjectMetadata."

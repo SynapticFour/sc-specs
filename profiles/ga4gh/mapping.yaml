@@ -1,0 +1,51 @@
+ga4gh_drs:
+  sc_primitive: sc-objects
+  mapping:
+    - ga4gh: "GET /ga4gh/drs/v1/objects/{id}"
+      sc: "GET /sc/objects/v1/objects/{id}"
+      notes: "Same semantics. DRS adds access_methods with presigned URLs."
+    - ga4gh: "GET /ga4gh/drs/v1/objects/{id}/access/{access_id}"
+      sc: "GET /sc/objects/v1/objects/{id}/stream"
+      notes: "SC unifies access resolution and streaming in one endpoint."
+ga4gh_wes:
+  sc_primitive: sc-workflows
+  mapping:
+    - ga4gh: "POST /ga4gh/wes/v1/runs"
+      sc: "POST /sc/workflows/v1/runs"
+      notes: "Workflow submission aligns with run creation semantics."
+    - ga4gh: "GET /ga4gh/wes/v1/runs/{run_id}"
+      sc: "GET /sc/workflows/v1/runs/{id}"
+      notes: "Run status retrieval maps directly."
+ga4gh_tes:
+  sc_primitive: sc-tasks
+  mapping:
+    - ga4gh: "POST /ga4gh/tes/v1/tasks"
+      sc: "POST /sc/tasks/v1/tasks"
+      notes: "Task submission with container and resources."
+    - ga4gh: "GET /ga4gh/tes/v1/tasks/{id}"
+      sc: "GET /sc/tasks/v1/tasks/{id}"
+      notes: "Task inspection maps directly."
+ga4gh_trs:
+  sc_primitive: sc-registry
+  mapping:
+    - ga4gh: "GET /ga4gh/trs/v2/tools"
+      sc: "GET /sc/registry/v1/tools"
+      notes: "Tool listing aligns with registry discovery."
+    - ga4gh: "GET /ga4gh/trs/v2/tools/{id}/versions/{version_id}"
+      sc: "GET /sc/registry/v1/tools/{id}/versions/{version}"
+      notes: "Version-specific fetch aligns directly."
+ga4gh_beacon:
+  sc_primitive: sc-query
+  mapping:
+    - ga4gh: "POST /beacon/query"
+      sc: "POST /sc/query/v1/query"
+      notes: "SC query remains schema-agnostic, Beacon is genomic-specific."
+    - ga4gh: "GET /beacon/map/entry_types"
+      sc: "GET /sc/query/v1/fields"
+      notes: "SC fields endpoint exposes adapter-registered queryable schema."
+ga4gh_service_info:
+  sc_primitive: sc-registry
+  mapping:
+    - ga4gh: "GET /service-info"
+      sc: "GET /sc/registry/v1/tools"
+      notes: "SC does not define a dedicated service-info endpoint; implementers commonly expose capability metadata alongside registry listings."

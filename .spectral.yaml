@@ -1,0 +1,29 @@
+extends: ["spectral:oas"]
+rules:
+  operation-operationId: error
+  operation-tags: error
+  sc-stability-annotation:
+    description: "All operations must have x-synaptic-core-stability"
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      field: "x-synaptic-core-stability"
+      function: defined
+  sc-error-responses:
+    description: "All operations must document at least one 4xx response"
+    given: "$.paths[*][*]"
+    severity: error
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            responses:
+              anyOf:
+                - required: ["400"]
+                - required: ["401"]
+                - required: ["403"]
+                - required: ["404"]
+                - required: ["409"]
+                - required: ["416"]
