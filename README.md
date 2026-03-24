@@ -55,6 +55,11 @@ by [Synaptic Four](https://synapticfour.com), Stuttgart.
 - [`specs/sc-provenance/v1/openapi.yaml`](specs/sc-provenance/v1/openapi.yaml)
 - [`specs/sc-transport/v1/asyncapi.yaml`](specs/sc-transport/v1/asyncapi.yaml)
 
+## Release Baseline
+
+- `v1.0.0` is the first stable baseline for Synaptic Core conformance checks.
+- Downstream repositories may pin `SC_SPECS_VERSION=1.0.0` and resolve `refs/tags/v1.0.0`.
+
 ## License
 
 **CC0 1.0 Universal — public domain.** No restrictions on use or implementation.
