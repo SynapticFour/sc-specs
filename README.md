@@ -1,6 +1,6 @@
 # Synaptic Core API Specifications
 
-API specifications for the [Synaptic Core](https://github.com/SynapticFour/synaptic-core)
+API specifications for the [Synaptic Core](https://github.com/SynapticFour/Synaptic-Core)
 scientific compute fabric — a domain-agnostic set of primitives for stable
 object identity, task execution, workflow orchestration, federated discovery,
 and provenance tracking.
@@ -42,7 +42,7 @@ Design informed by:
 
 ## Reference Implementation
 
-[Synaptic Core](https://github.com/SynapticFour/synaptic-core) (Rust, BUSL-1.1)
+[Synaptic Core](https://github.com/SynapticFour/Synaptic-Core) (Rust, BUSL-1.1)
 by [Synaptic Four](https://synapticfour.com), Stuttgart.
 
 ## Specification Documents
