@@ -5,6 +5,8 @@ scientific compute fabric — a domain-agnostic set of primitives for stable
 object identity, task execution, workflow orchestration, federated discovery,
 and provenance tracking.
 
+> **Legal notice:** This repository documents technical capabilities and operating guidance. It is not legal advice and does not by itself provide regulatory certification or compliance guarantees. Compliance outcomes depend on operator configuration, contracts, and organisational controls.
+
 ## Purpose
 
 These specifications describe seven composable primitives applicable across
@@ -64,3 +66,14 @@ by [Synaptic Four](https://synapticfour.com), Stuttgart.
 
 **CC0 1.0 Universal — public domain.** No restrictions on use or implementation.
 The reference implementation has a separate licence (BUSL-1.1).
+
+## Support
+
+Questions about the specifications: [contact@synapticfour.com](mailto:contact@synapticfour.com).
+
+---
+
+Built by **Synaptic Four** for transparent, standards-based scientific infrastructure.
+Developed by a neurodiverse team, including autistic engineers, with a focus on precision, clarity, and reliable operations.
+Contact: [contact@synapticfour.com](mailto:contact@synapticfour.com) · [synapticfour.com](https://synapticfour.com)
+
