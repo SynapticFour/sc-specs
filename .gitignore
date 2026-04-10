@@ -1,0 +1,33 @@
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Generic build artifacts
+coverage/
+dist/
+build/
+target/
+.tmp/
+
+# Node
+node_modules/
+.next/
+.svelte-kit/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Rust
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
