@@ -5,7 +5,7 @@ info:
   description: Domain-agnostic workflow orchestration for CWL, WDL, Nextflow, and Snakemake. Proposed standard under CC0 1.0 Universal.
 
   contact:
-    name: Synaptic Four
+    name: Project maintainers
     url: https://synapticfour.com
     email: contact@synapticfour.com
   license:

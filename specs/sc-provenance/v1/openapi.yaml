@@ -5,7 +5,7 @@ info:
   description: Append-only provenance graph traversal and linkage with RO-Crate export. Domain-agnostic proposed standard under CC0 1.0 Universal.
 
   contact:
-    name: Synaptic Four
+    name: Project maintainers
     url: https://synapticfour.com
     email: contact@synapticfour.com
   license:

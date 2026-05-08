@@ -5,7 +5,7 @@ Lazy consensus: changes are accepted if no objection within 7 days.
 Breaking changes require a formal RFC and 30-day review window.
 
 ## Roles
-Editors: Synaptic Four (initial maintainers)
+Editors: Project maintainers (initial edition)
 Contributors: anyone via pull request
 Implementers: anyone building a compatible system
 

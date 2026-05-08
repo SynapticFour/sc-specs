@@ -5,7 +5,7 @@ info:
   description: Domain-agnostic API for engine-agnostic, containerized task execution. Proposed standard under CC0 1.0 Universal.
 
   contact:
-    name: Synaptic Four
+    name: Project maintainers
     url: https://synapticfour.com
     email: contact@synapticfour.com
   license:

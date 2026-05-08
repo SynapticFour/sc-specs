@@ -2,7 +2,7 @@
 
 Status: ACCEPTED
 Date: 2026-03-23
-Author: Synaptic Four Technical Team
+Author: Initial project contributors
 
 ## Abstract
 This RFC defines seven primitives as the minimum interoperable substrate for cross-domain scientific compute and reproducibility.

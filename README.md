@@ -44,8 +44,7 @@ Design informed by:
 
 ## Reference Implementation
 
-[Synaptic Core](https://github.com/SynapticFour/Synaptic-Core) (Rust, BUSL-1.1)
-by [Synaptic Four](https://synapticfour.com), Stuttgart.
+[Synaptic Core](https://github.com/SynapticFour/Synaptic-Core) (Rust, BUSL-1.1).
 
 ## Specification Documents
 
@@ -73,7 +72,5 @@ Questions about the specifications: [contact@synapticfour.com](mailto:contact@sy
 
 ---
 
-Built by **Synaptic Four** for transparent, standards-based scientific infrastructure.
-Developed by a neurodiverse team, including autistic engineers, with a focus on precision, clarity, and reliable operations.
-Contact: [contact@synapticfour.com](mailto:contact@synapticfour.com) · [synapticfour.com](https://synapticfour.com)
+Contact: [contact@synapticfour.com](mailto:contact@synapticfour.com)
 

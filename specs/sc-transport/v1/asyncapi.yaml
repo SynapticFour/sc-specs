@@ -6,7 +6,7 @@ info:
   version: 1.0.0
   description: Event-driven telemetry transport for active workflow runs. SSE is stable, QUIC streams are optional, and QUIC datagrams are experimental.
   contact:
-    name: Synaptic Four
+    name: Project maintainers
     url: https://synapticfour.com
     email: contact@synapticfour.com
   license:
