@@ -191,7 +191,7 @@ components:
         inputs: {type: array, items: {$ref: '#/components/schemas/InputRef'}}
         outputs: {type: array, items: {$ref: '#/components/schemas/OutputCaptureRequest'}}
         environment: {type: object, additionalProperties: {type: string}}
-        backend: {type: [string, 'null'], enum: [docker, slurm, lsf, pbs, null]}
+        backend: {type: [string, 'null'], enum: [docker, slurm, lsf, pbs]}
       required: [container_image, command]
     TaskStatus:
       type: object

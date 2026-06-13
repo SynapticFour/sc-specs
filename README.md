@@ -46,6 +46,15 @@ Design informed by:
 
 [Synaptic Core](https://github.com/SynapticFour/Synaptic-Core) (Rust, BUSL-1.1).
 
+**Synaptic Core stack:** see **[docs/ECOSYSTEM.md](docs/ECOSYSTEM.md)** for Synaptic-Core, sc-transport, and Synaptic-Core-Test.
+
+### Validate (no server required)
+
+```bash
+make validate
+# or: python3 scripts/validate_examples.py
+```
+
 ## Specification Documents
 
 - [`specs/sc-objects/v1/openapi.yaml`](specs/sc-objects/v1/openapi.yaml)
