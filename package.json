@@ -3,6 +3,22 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "validate": "spectral lint 'specs/**/openapi.yaml' && asyncapi validate specs/sc-transport/v1/asyncapi.yaml && python3 scripts/validate_examples.py"
+    "validate": "spectral lint 'specs/**/openapi.yaml' && asyncapi validate specs/sc-transport/v1/asyncapi.yaml && python3 scripts/validate_examples.py",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.5"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
