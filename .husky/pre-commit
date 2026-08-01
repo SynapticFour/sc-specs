@@ -1,1 +1,8 @@
-npx lint-staged
+#!/usr/bin/env sh
+set -e
+cd "$(dirname "$0")/.." || exit 1
+if python3 -m pre_commit --version >/dev/null 2>&1; then
+  python3 -m pre_commit run --hook-stage commit
+else
+  ./scripts/hooks/ci-check.sh
+fi
