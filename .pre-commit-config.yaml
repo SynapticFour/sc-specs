@@ -3,7 +3,7 @@ repos:
   - repo: local
     hooks:
       - id: ci-parity
-        name: Spec validation (spectral + asyncapi + examples)
+        name: Spec validation (spectral + asyncapi + pytest + examples)
         entry: scripts/hooks/ci-check.sh
         language: script
         pass_filenames: false

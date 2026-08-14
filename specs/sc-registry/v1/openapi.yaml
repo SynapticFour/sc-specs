@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Synaptic Core — Registry API
-  version: 1.0.0
+  version: 1.1.0
   description: Domain-agnostic registry for versioned tools and workflows. Proposed standard under CC0 1.0 Universal.
 
   contact:
@@ -63,11 +63,7 @@ paths:
           description: Tool list
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  tools: {type: array, items: {$ref: '#/components/schemas/ToolEntry'}}
-                required: [tools]
+              schema: {$ref: '#/components/schemas/ToolList'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '500': {$ref: '#/components/responses/InternalError'}
   /tools/{id}/versions/{version}:
@@ -199,6 +195,11 @@ components:
         description: {type: [string, 'null']}
         metadata: {type: object, additionalProperties: true}
       required: [id, name, version, container_image, description, metadata]
+    ToolList:
+      type: object
+      properties:
+        tools: {type: array, items: {$ref: '#/components/schemas/ToolEntry'}}
+      required: [tools]
     WorkflowEntry:
       type: object
       properties:

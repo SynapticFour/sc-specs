@@ -1,1 +1,1 @@
-{"name":"tumor-sample.bam","mime_type":"application/octet-stream","encrypt":true,"metadata":{"organism":"human"}}
+{"name":"tumor-sample.bam","bytes":[66,65,77],"mime_type":"application/octet-stream","metadata":{"organism":"human"},"is_encrypted":true}

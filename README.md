@@ -51,9 +51,12 @@ Design informed by:
 ### Validate (no server required)
 
 ```bash
+python3 -m pip install -r requirements-dev.txt
 make validate
-# or: python3 scripts/validate_examples.py
+# examples only: python3 scripts/validate_examples.py
 ```
+
+`make validate` matches CI: Spectral (OpenAPI), AsyncAPI, pytest, and example-to-schema checks.
 
 ## Specification Documents
 
@@ -82,4 +85,3 @@ Questions about the specifications: [contact@synapticfour.com](mailto:contact@sy
 ---
 
 Contact: [contact@synapticfour.com](mailto:contact@synapticfour.com)
-

@@ -5,10 +5,11 @@
 help:
 	@echo "sc-specs — Synaptic Four Core stack (specifications only)"
 	@echo ""
-	@echo "  make validate   Validate OpenAPI examples and spec consistency"
+	@echo "  make validate   Spectral + AsyncAPI + pytest + example schemas"
+	@echo "                  (same gate as .github/workflows/validate.yml)"
 	@echo ""
 	@echo "No deploy targets — this repo holds API specifications."
 	@echo "Start the reference server: cd ../Synaptic-Core && make up"
 
 validate:
-	python3 scripts/validate_examples.py
+	./scripts/hooks/ci-check.sh

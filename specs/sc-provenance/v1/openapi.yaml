@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Synaptic Core — Provenance API
-  version: 1.0.0
+  version: 1.1.0
   description: Append-only provenance graph traversal and linkage with RO-Crate export. Domain-agnostic proposed standard under CC0 1.0 Universal.
 
   contact:
@@ -107,7 +107,11 @@ paths:
     get:
       tags: [ro-crate]
       summary: Download a Workflow Run RO-Crate for a completed run
-      description: Download RO-Crate archive for a completed workflow run.
+      description: |
+        Download RO-Crate archive for a completed workflow run.
+        The zip contains `ro-crate-metadata.json` conforming to RoCrateMetadata
+        (documented here as `application/ld+json` for that member, not as a
+        separate HTTP body).
       operationId: downloadWorkflowRunRoCrate
       x-synaptic-core-stability: stable
       parameters:
@@ -121,6 +125,8 @@ paths:
           content:
             application/zip:
               schema: {type: string, format: binary}
+            application/ld+json:
+              schema: {$ref: '#/components/schemas/RoCrateMetadata'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
@@ -174,3 +180,22 @@ components:
         nodes: {type: array, items: {$ref: '#/components/schemas/Node'}}
         links: {type: array, items: {$ref: '#/components/schemas/Link'}}
       required: [root_id, nodes, links]
+    RoCrateMetadata:
+      type: object
+      description: JSON-LD manifest (`ro-crate-metadata.json`) inside the Workflow Run RO-Crate zip.
+      properties:
+        "@context": {type: string, format: uri}
+        "@graph":
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              "@id": {type: string}
+              "@type":
+                oneOf:
+                  - type: string
+                  - type: array
+                    items: {type: string}
+            required: ["@id"]
+      required: ["@context", "@graph"]
