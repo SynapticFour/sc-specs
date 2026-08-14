@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.1.0
+
+### Scope
+- Document Synaptic-Core JSON ingest (`/ingest`) and streaming ingest (`/ingest/stream`) on sc-objects.
+- Add `IngestObjectJsonRequest` schema.
+
+### Compatibility
+- Additive OpenAPI paths; existing `/objects/*` contracts unchanged.
+
 ## v1.0.0
 
 ### Scope

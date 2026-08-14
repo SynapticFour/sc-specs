@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Synaptic Core — Objects API
-  version: 1.0.0
+  version: 1.1.0
   description: Domain-agnostic API for stable object identity, metadata, and byte-range binary streaming. Proposed standard, licensed under CC0 1.0 Universal.
 
   contact:
@@ -41,6 +41,70 @@ paths:
                 encrypt: {type: boolean, default: false}
                 data: {type: string, format: binary}
               required: [name, data]
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/ObjectMetadata'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '413': {$ref: '#/components/responses/PayloadTooLarge'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /ingest:
+    post:
+      tags: [objects]
+      summary: Ingest a new object via JSON body (small objects)
+      description: |
+        Upload content as a JSON `bytes` array (small objects only; typically capped at 64 MiB).
+        Prefer `/ingest/stream` for large payloads. Synaptic-Core mounts this at `/sc/objects/v1/ingest`.
+      operationId: ingestObjectJson
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/IngestObjectJsonRequest'}
+      responses:
+        '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/ObjectMetadata'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '413': {$ref: '#/components/responses/PayloadTooLarge'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /ingest/stream:
+    post:
+      tags: [objects, streaming]
+      summary: Ingest a new object via raw body stream
+      description: |
+        Stream binary content as the HTTP body. Query provides `name` (required);
+        optional `mime_type` and `is_encrypted`. Optional header `x-synaptic-metadata`
+        carries a JSON metadata object. Synaptic-Core mounts this at
+        `/sc/objects/v1/ingest/stream` (route body limit typically 16 GiB).
+      operationId: ingestObjectStream
+      x-synaptic-core-stability: stable
+      security: [{bearerAuth: []}]
+      parameters:
+        - in: query
+          name: name
+          required: true
+          schema: {type: string}
+        - in: query
+          name: mime_type
+          required: false
+          schema: {type: string}
+        - in: query
+          name: is_encrypted
+          required: false
+          schema: {type: boolean, default: false}
+        - in: header
+          name: x-synaptic-metadata
+          required: false
+          schema: {type: string}
+          description: JSON object with adapter metadata
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema: {type: string, format: binary}
       responses:
         '201': {description: Created, content: {application/json: {schema: {$ref: '#/components/schemas/ObjectMetadata'}}}}
         '400': {$ref: '#/components/responses/BadRequest'}
@@ -252,3 +316,15 @@ components:
         access_methods: {type: array, items: {$ref: '#/components/schemas/AccessMethod'}}
         metadata: {type: object, additionalProperties: true}
       required: [name, size_bytes, checksums, access_methods]
+    IngestObjectJsonRequest:
+      type: object
+      description: Small-object JSON ingest (prefer /ingest/stream for large payloads)
+      properties:
+        name: {type: string}
+        bytes:
+          type: array
+          items: {type: integer, minimum: 0, maximum: 255}
+        mime_type: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+        is_encrypted: {type: boolean, default: false}
+      required: [name, bytes, metadata, is_encrypted]
