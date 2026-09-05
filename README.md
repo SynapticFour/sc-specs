@@ -1,5 +1,15 @@
 # Synaptic Core API Specifications
 
+> **Development paused (2026-09).** This repository is parked.
+>
+> It is **not Ferrum**, not the GA4GH released join, and not a Synaptic Four product SKU.
+>
+> **What this is:** proposed OpenAPI/AsyncAPI text for the parked Synaptic Core
+> stack. The implementation repo is private. These specs are not Ferrum APIs
+> and not GA4GH standards.
+>
+> Do not treat this tree as a live product or as certification.
+
 API specifications for the [Synaptic Core](https://github.com/SynapticFour/Synaptic-Core)
 scientific compute fabric — a domain-agnostic set of primitives for stable
 object identity, task execution, workflow orchestration, federated discovery,
